@@ -29,8 +29,8 @@ Play it live on [GitHub Pages](https://makalin.github.io/Grid-Runner/)
 ### Setup
 1. **Clone the Repository:**
    ```bash
-   git clone https://github.com/makalin/grid-runner.git
-   cd grid-runner
+   git clone https://github.com/makalin/Grid-Runner.git
+   cd Grid-Runner
    ```
 
 2. **Install Dependencies (Optional):**
