@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Grid Runner</title>
+    <style>
+        body, html { 
+            margin: 0; 
+            padding: 0;
+            overflow: hidden; 
+            background-color: black; 
+            width: 100%;
+            height: 100%;
+        }
+        #overlay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: lime;
+            font-family: monospace;
+            z-index: 100;
+        }
+        #instructions {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            color: lime;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div id="overlay">Score: 0 | Time: 0s</div>
+    <div id="instructions">Use ← → Arrow Keys to Dodge | Collect Blue Orbs</div>
+    <script type="module">
+        import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js';
+
+        class GridRunner {
+            constructor() {
+                // Scene setup
+                this.scene = new THREE.Scene();
+                this.scene.background = new THREE.Color(0x000000);
+                
+                // Camera
+                this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                this.camera.position.z = 5;
+                this.camera.position.y = 3;
+
+                // Renderer - full screen
+                this.renderer = new THREE.WebGLRenderer();
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                document.body.appendChild(this.renderer.domElement);
+
+                // Responsive resize
+                window.addEventListener('resize', () => {
+                    this.camera.aspect = window.innerWidth / window.innerHeight;
+                    this.camera.updateProjectionMatrix();
+                    this.renderer.setSize(window.innerWidth, window.innerHeight);
+                });
+
+                // Player
+                this.playerGeometry = new THREE.BoxGeometry(1, 1, 1);
+                this.playerMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+                this.player = new THREE.Mesh(this.playerGeometry, this.playerMaterial);
+                this.player.position.y = 0.5;
+                this.scene.add(this.player);
+
+                // Dynamic Grid
+                this.gridHelper = new THREE.GridHelper(200, 200, 0x00ff00, 0x003300);
+                this.scene.add(this.gridHelper);
+
+                // Game state
+                this.score = 0;
+                this.startTime = Date.now();
+                this.obstacles = [];
+                this.orbs = [];
+                this.gameSpeed = 0.1;
+                this.difficulty = 1;
+
+                // Controls
+                this.keys = {};
+                window.addEventListener('keydown', (e) => {
+                    this.keys[e.code] = true;
+                });
+                window.addEventListener('keyup', (e) => {
+                    this.keys[e.code] = false;
+                });
+
+                // Spawn initial obstacles and orbs
+                this.spawnObstacles();
+                this.spawnOrbs();
+            }
+
+            spawnObstacles() {
+                // Spawn red obstacles with varied positioning
+                for (let i = 0; i < 10; i++) {
+                    const obstacle = new THREE.Mesh(
+                        new THREE.BoxGeometry(1, 1, 1),
+                        new THREE.MeshBasicMaterial({ color: 0xff0000 })
+                    );
+                    
+                    obstacle.position.x = (Math.random() - 0.5) * 30;
+                    obstacle.position.z = -50 - (Math.random() * 40);
+                    obstacle.position.y = 0.5;
+                    
+                    this.scene.add(obstacle);
+                    this.obstacles.push(obstacle);
+                }
+            }
+
+            spawnOrbs() {
+                // Spawn blue collectible orbs
+                for (let i = 0; i < 5; i++) {
+                    const orb = new THREE.Mesh(
+                        new THREE.SphereGeometry(0.5, 32, 32),
+                        new THREE.MeshBasicMaterial({ color: 0x0000ff })
+                    );
+                    
+                    orb.position.x = (Math.random() - 0.5) * 30;
+                    orb.position.z = -50 - (Math.random() * 40);
+                    orb.position.y = 0.5;
+                    
+                    this.scene.add(orb);
+                    this.orbs.push(orb);
+                }
+            }
+
+            update() {
+                const elapsedTime = (Date.now() - this.startTime) / 1000;
+                this.difficulty = 1 + Math.floor(elapsedTime / 15);
+
+                // Move player horizontally with screen width consideration
+                const moveSpeed = 0.5 * (window.innerWidth / 800);
+                if (this.keys['ArrowLeft']) this.player.position.x -= moveSpeed;
+                if (this.keys['ArrowRight']) this.player.position.x += moveSpeed;
+
+                // Clamp player position based on screen width
+                const maxX = 15 * (window.innerWidth / 800);
+                this.player.position.x = Math.max(Math.min(this.player.position.x, maxX), -maxX);
+
+                // Rotate grid dynamically
+                this.gridHelper.rotation.x = Math.sin(elapsedTime * 0.1) * 0.1 * this.difficulty;
+                this.gridHelper.rotation.z = Math.cos(elapsedTime * 0.1) * 0.1 * this.difficulty;
+
+                // Move obstacles and check collisions
+                this.obstacles.forEach((obstacle, index) => {
+                    obstacle.position.z += this.gameSpeed * 5 * this.difficulty;
+
+                    // Collision with player
+                    if (obstacle.position.distanceTo(this.player.position) < 1) {
+                        alert(`Game Over! Score: ${this.score} | Time: ${Math.floor(elapsedTime)}s`);
+                        location.reload();
+                    }
+
+                    // Remove obstacles that pass player
+                    if (obstacle.position.z > this.player.position.z + 5) {
+                        this.scene.remove(obstacle);
+                        this.obstacles.splice(index, 1);
+                    }
+                });
+
+                // Collect orbs
+                this.orbs.forEach((orb, index) => {
+                    orb.position.z += this.gameSpeed * 5 * this.difficulty;
+                    orb.rotation.y += 0.1;
+
+                    // Orb collection
+                    if (orb.position.distanceTo(this.player.position) < 1) {
+                        this.score += 10;
+                        this.scene.remove(orb);
+                        this.orbs.splice(index, 1);
+                    }
+
+                    // Remove orbs that pass player
+                    if (orb.position.z > this.player.position.z + 5) {
+                        this.scene.remove(orb);
+                        this.orbs.splice(index, 1);
+                    }
+                });
+
+                // Spawn new obstacles and orbs
+                if (this.obstacles.length < 10) this.spawnObstacles();
+                if (this.orbs.length < 5) this.spawnOrbs();
+
+                // Update display
+                document.getElementById('overlay').innerHTML = 
+                    `Score: ${this.score} | Time: ${Math.floor(elapsedTime)}s | Speed: x${this.difficulty.toFixed(1)}`;
+
+                // Gradually increase game speed
+                this.gameSpeed += 0.0001 * this.difficulty;
+            }
+
+            animate() {
+                requestAnimationFrame(() => this.animate());
+                this.update();
+                this.renderer.render(this.scene, this.camera);
+            }
+
+            start() {
+                this.animate();
+            }
+        }
+
+        // Start the game
+        const game = new GridRunner();
+        game.start();
+    </script>
+</body>
+</html>

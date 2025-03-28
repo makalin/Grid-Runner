@@ -1,0 +1,21 @@
+body {
+  margin: 0;
+  background: #000;
+  overflow: hidden;
+}
+#game-container {
+  width: 100vw;
+  height: 100vh;
+  filter: contrast(1.2) brightness(1.1);
+  background: radial-gradient(circle, #111, #000);
+}
+#game-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(transparent 0%, transparent 2px, rgba(0, 0, 0, 0.1) 2px, rgba(0, 0, 0, 0.1) 4px);
+  pointer-events: none;
+}

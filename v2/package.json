@@ -1,0 +1,22 @@
+{
+  "name": "grid-runner",
+  "version": "1.0.0",
+  "description": "![Grid Runner Screenshot](assets/screenshot.png)   *An 80s-inspired endless runner built with Three.js*",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/makalin/Grid-Runner.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/makalin/Grid-Runner/issues"
+  },
+  "homepage": "https://github.com/makalin/Grid-Runner#readme",
+  "dependencies": {
+    "three": "^0.162.0"
+  }
+}

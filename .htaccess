@@ -1,0 +1,5 @@
+AddType application/javascript .js
+AddType application/javascript .mjs
+
+# Enable CORS for module loading
+Header set Access-Control-Allow-Origin "*" 
