@@ -1,6 +1,5 @@
 # Grid Runner
 
-![Grid Runner Screenshot](assets/screenshot.png)  
 *An 80s-inspired endless runner built with Three.js*
 
 **Grid Runner** is a retro-style arcade game where you pilot a rogue AI across a glowing, wireframe grid. Dodge Security Drones, leap over Glitch Walls, and collect power-ups to rack up your score in this fast-paced, neon-drenched digital world. Built with Three.js, it brings 80s vector graphics into a modern 3D browser experience.
@@ -17,7 +16,7 @@
 ---
 
 ## Demo
-Play it live on [GitHub Pages](https://makalin.github.io/Grid-Runner/) (replace with your deployed URL after hosting).
+Play it live on [GitHub Pages](https://makalin.github.io/Grid-Runner/)
 
 ---
 
